@@ -2,13 +2,13 @@ import { ItemsResponse } from "./types";
 
 export const fetchItems = async (page: number = 1, search: string = ''): Promise<ItemsResponse> => {
     const response = await fetch(
-      `http://localhost:3001/api/items?page=${page}&limit=20&search=${search}`
+      `http://83.166.245.137:3001/api/items?page=${page}&limit=20&search=${search}`
     );
     return await response.json();
   };
 
   export const updateSelection = async (id: number, selected: boolean): Promise<{ success: boolean }> => {
-    const response = await fetch('http://localhost:3001/api/items/select', {
+    const response = await fetch('http://83.166.245.137:3001/api/items/select', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export const fetchItems = async (page: number = 1, search: string = ''): Promise
   };
   
   export const updateOrder = async (order: number[]): Promise<{ success: boolean }> => {
-    const response = await fetch('http://localhost:3001/api/items/order', {
+    const response = await fetch('http://83.166.245.137:3001/api/items/order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

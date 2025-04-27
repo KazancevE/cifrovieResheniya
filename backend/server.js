@@ -8,7 +8,7 @@ app.use(express.json());
 const PORT = 3001;
 
 // Имитация базы данных
-let items = Array.from({ length: 1000000 }, (_, i) => ({
+let items = Array.from({ length: 1000 }, (_, i) => ({
   id: i + 1,
   name: `Item ${i + 1}`,
   selected: false
@@ -19,26 +19,33 @@ let customOrder = [...items.map(item => item.id)];
 
 // Получение элементов с пагинацией
 app.get('/api/items', (req, res) => {
-  const { page = 1, limit = 20, search = '' } = req.query;
+  // Явно преобразуем параметры в числа
+  const page = Number(req.query.page) || 1; // По умолчанию 1
+  const limit = Number(req.query.limit) || 20; // По умолчанию 20
   const offset = (page - 1) * limit;
 
-  let filteredItems = [...items];
-  
-  if (search) {
-    filteredItems = filteredItems.filter(item => 
-      item.name.toLowerCase().includes(search.toLowerCase())
+  // Фильтрация (если есть поиск)
+  let filteredItems = items;
+  if (req.query.search) {
+    const search = req.query.search.toLowerCase();
+    filteredItems = items.filter(item => 
+      item.name.toLowerCase().includes(search)
     );
   }
 
-  // Применяем кастомный порядок
-  const orderedItems = [...filteredItems].sort((a, b) => {
-    return customOrder.indexOf(a.id) - customOrder.indexOf(b.id);
-  });
+  // Пагинация с преобразованием offset и limit в числа
+  const paginatedItems = filteredItems.slice(offset, offset + limit);
 
-  const paginatedItems = orderedItems.slice(offset, offset + limit);
-  
+  // Сортировка только текущей страницы
+  const orderMap = new Map();
+  customOrder.forEach((id, index) => orderMap.set(id, index));
+
+  const sortedPageItems = [...paginatedItems].sort(
+    (a, b) => orderMap.get(a.id) - orderMap.get(b.id)
+  );
+
   res.json({
-    items: paginatedItems,
+    items: sortedPageItems,
     total: filteredItems.length
   });
 });
